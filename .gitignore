@@ -1,0 +1,22 @@
+# Secrets
+api-key-*.txt
+id_ed25519_pi3
+id_ed25519_pi3.pub
+*.pem
+*.key
+
+# Claude
+CLAUDE.md
+.claude/
+
+# OS
+.DS_Store
+
+# Node (web subfolder)
+web/node_modules/
+web/.next/
+web/.env.local
+
+# Build artifacts
+*.o
+*.moc
