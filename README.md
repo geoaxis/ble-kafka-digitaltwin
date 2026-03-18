@@ -44,6 +44,28 @@ Both the kiosk and the web dashboard use the same STL model files from the origi
 
 ## Quick Start
 
+### Configuration
+
+Both the kiosk and web dashboard read Kafka credentials from environment variables — no secrets are stored in the repo.
+
+**Kiosk** — create `/etc/kiosk.env` on the Pi (loaded by systemd):
+```env
+KAFKA_BROKERS=your-broker.confluent.cloud:9092
+KAFKA_TOPIC=sensortag-imu
+KAFKA_API_KEY=your-api-key
+KAFKA_API_SECRET=your-api-secret
+```
+
+**Web Dashboard** — create `web/.env.local`:
+```env
+KAFKA_BROKERS=your-broker.confluent.cloud:9092
+KAFKA_TOPIC=sensortag-imu
+KAFKA_API_KEY=your-api-key
+KAFKA_API_SECRET=your-api-secret
+```
+
+### Build & Run
+
 **Kiosk** (on the Pi):
 ```bash
 cd ~/kiosk/src && qmake6 kiosk.pro && make -j4
@@ -77,4 +99,5 @@ pi3/
 
 ## Documentation
 
-For detailed architecture, diagrams, and implementation details see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+- **[docs/RPI.md](docs/RPI.md)** — Raspberry Pi setup (Qt6, Bluetooth, display, systemd, boot optimization)
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Detailed architecture, diagrams, and implementation details

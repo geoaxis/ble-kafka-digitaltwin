@@ -34,16 +34,16 @@ Every Kafka message on the `sensortag-imu` topic is a JSON object:
 ```mermaid
 classDiagram
     class SensorData {
-        +number ts : timestamp (ms)
-        +number p : pitch (deg)
-        +number r : roll (deg)
-        +number w : yaw (deg)
-        +number ax : accel X (g)
-        +number ay : accel Y (g)
-        +number az : accel Z (g)
-        +number gx : gyro X (deg/s)
-        +number gy : gyro Y (deg/s)
-        +number gz : gyro Z (deg/s)
+        +number ts : timestamp ms
+        +number p : pitch deg
+        +number r : roll deg
+        +number w : yaw deg
+        +number ax : accel X g
+        +number ay : accel Y g
+        +number az : accel Z g
+        +number gx : gyro X deg-s
+        +number gy : gyro Y deg-s
+        +number gz : gyro Z deg-s
     }
 ```
 
@@ -59,11 +59,11 @@ classDiagram
 graph TB
     subgraph "Raspberry Pi 3"
         direction TB
-        SVC[systemd kiosk.service] --> BIN[/usr/local/bin/kiosk/]
-        BIN --> QML[main.qml - UI & 3D]
-        BIN --> CPP[main.cpp - Calibrator]
-        ENV[/etc/kiosk.env] -.->|EnvironmentFile| SVC
-        CAL[/etc/pointercal] -.->|touch calibration| CPP
+        SVC["systemd kiosk.service"] --> BIN["/usr/local/bin/kiosk"]
+        BIN --> QML["main.qml - UI & 3D"]
+        BIN --> CPP["main.cpp - Calibrator"]
+        ENV["/etc/kiosk.env"] -.->|EnvironmentFile| SVC
+        CAL["/etc/pointercal"] -.->|touch calibration| CPP
         DRM[DRM/EGL Framebuffer] --> LCD[Joyit 5in HDMI LCD]
         BLE[hci0 Bluetooth] --> TAG[CC2650 SensorTag]
     end
@@ -152,21 +152,21 @@ The Pi boots to the kiosk in ~12 seconds from power-on:
 ```mermaid
 gantt
     title Pi 3 Boot Timeline (~12s to kiosk)
-    dateFormat s
-    axisFormat %S s
+    dateFormat X
+    axisFormat %s s
 
     section Kernel
-    Kernel boot           :k1, 0, 4s
+    Kernel boot           :k1, 0, 4
 
     section Hardware
-    DRM card0 ready       :h1, 4, 8s
+    DRM card0 ready       :h1, 4, 8
 
     section Kiosk
-    systemd starts kiosk  :a1, 8, 10s
-    3D scene rendered     :a2, 10, 12s
+    systemd starts kiosk  :a1, 8, 10
+    3D scene rendered     :a2, 10, 12
 
     section Network
-    WiFi association      :n1, 10, 22s
+    WiFi association      :n1, 10, 22
 ```
 
 ### Boot Optimizations
@@ -254,5 +254,6 @@ pi3/
 ├── web-assets/
 │   └── STL/                      # Original TI CAD files
 └── docs/
-    └── ARCHITECTURE.md           # This file
+    ├── ARCHITECTURE.md           # This file
+    └── RPI.md                    # Raspberry Pi setup guide
 ```
