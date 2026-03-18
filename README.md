@@ -56,6 +56,25 @@ cd web && npm install && npm run dev:all
 ```
 Opens at `http://localhost:3000` with Kafka bridge on `ws://localhost:3001`.
 
+## Project Structure
+
+```
+pi3/
+├── kiosk/                # Qt6 kiosk app (runs on Pi)
+│   ├── main.cpp          # BLE, Kafka producer, touch calibration
+│   ├── main.qml          # QML UI and 3D scenes
+│   ├── kiosk.pro         # qmake project file
+│   ├── qml.qrc           # Qt resource file
+│   └── meshes/           # 3D model meshes
+├── web/                  # Next.js web dashboard
+│   ├── app/              # Pages and layout
+│   ├── components/       # Three.js 3D scene
+│   ├── lib/              # WebSocket sensor data hook
+│   └── server/           # Kafka-to-WebSocket bridge
+├── web-assets/           # Original TI CAD files
+└── docs/                 # Detailed documentation
+```
+
 ## Documentation
 
 For detailed architecture, diagrams, and implementation details see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.

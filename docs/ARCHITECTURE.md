@@ -228,24 +228,31 @@ graph LR
 
 ```
 pi3/
-├── main.cpp                  # Qt6 entry point + Calibrator class
-├── main.qml                  # QML UI: 3D views, BLE flow, calibration
-├── web/
+├── kiosk/                        # Qt6 kiosk app (runs on Pi)
+│   ├── main.cpp                  # BLE manager, Kafka producer, touch calibrator
+│   ├── main.qml                  # QML UI: 3D views, BLE flow, calibration
+│   ├── kiosk.pro                 # qmake6 project file
+│   ├── qml.qrc                   # Qt resource definitions
+│   └── meshes/                   # Qt3D mesh files
+│       ├── sensortag_box.mesh
+│       ├── sensortag_jacket.mesh
+│       └── sensortag_lid.mesh
+├── web/                          # Next.js web dashboard
 │   ├── app/
-│   │   ├── page.tsx          # Dashboard page with debug overlay
-│   │   ├── layout.tsx        # Root layout + fonts
-│   │   └── globals.css       # Tailwind v4 theme
+│   │   ├── page.tsx              # Dashboard page with debug overlay
+│   │   ├── layout.tsx            # Root layout + fonts
+│   │   └── globals.css           # Tailwind v4 theme
 │   ├── components/
-│   │   └── SensorTagScene.tsx  # React Three Fiber 3D scene
+│   │   └── SensorTagScene.tsx    # React Three Fiber 3D scene
 │   ├── lib/
-│   │   └── useSensorData.ts    # WebSocket hook for live IMU
+│   │   └── useSensorData.ts      # WebSocket hook for live IMU
 │   ├── server/
-│   │   └── kafka-ws.ts       # Kafka consumer -> WebSocket bridge
+│   │   └── kafka-ws.ts           # Kafka consumer -> WebSocket bridge
 │   └── public/models/
-│       ├── box.stl           # SensorTag enclosure mesh
-│       └── jacket.stl        # SensorTag jacket mesh
+│       ├── box.stl               # SensorTag enclosure mesh
+│       └── jacket.stl            # SensorTag jacket mesh
 ├── web-assets/
-│   └── STL/                  # Original TI CAD files
+│   └── STL/                      # Original TI CAD files
 └── docs/
-    └── ARCHITECTURE.md       # This file
+    └── ARCHITECTURE.md           # This file
 ```
