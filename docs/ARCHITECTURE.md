@@ -93,15 +93,27 @@ The kiosk is a 3-screen BLE application with a touch calibration flow:
 stateDiagram-v2
     [*] --> Welcome
     Welcome --> Scanning : CONNECT TO SENSORTAG
-    Scanning --> Connected : Tap device from list
+    Welcome --> Calibration : CALIBRATE
+    Scanning --> Welcome : CANCEL
+    Scanning --> Connecting : Tap device from list
+    Connecting --> Connected : BLE connected
+    Connecting --> Welcome : CANCEL
     Connected --> Welcome : DISCONNECT
     Connected --> Calibration : CALIBRATE
 
     state Welcome {
         [*] --> Static3DModel
         note right of Static3DModel
-            Auto-spinning SensorTag
-            model on Y-axis (8s cycle)
+            Static SensorTag 3D model
+        end note
+    }
+
+    state Scanning {
+        [*] --> ScanningDevices
+        note right of ScanningDevices
+            BLE scan for CC2650 SensorTag
+            STOP SCAN + CANCEL always visible
+            Device cache flushed each scan
         end note
     }
 
@@ -216,7 +228,7 @@ graph LR
 |-----------|--------|
 | **Board** | Raspberry Pi 3 (BCM2837, 1GB RAM) |
 | **Display** | Joyit 5" HDMI LCD v2, 1024x768 16bpp framebuffer |
-| **Touchscreen** | ADS7846 resistive (SPI), 9-point calibration |
+| **Touchscreen** | ADS7846 resistive (SPI), 9-point calibration, udev symlink at `/dev/input/touchscreen` |
 | **Bluetooth** | hci0, BLE for SensorTag connectivity |
 | **Sensor** | TI CC2650 SensorTag (9-axis IMU) |
 | **Network** | WiFi only (wlan0), no Ethernet |

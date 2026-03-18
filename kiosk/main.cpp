@@ -158,6 +158,9 @@ public:
         m_found.clear();
         emit devicesChanged();
 
+        // Remove cached BlueZ devices so only currently-advertising tags appear
+        removeCachedDevices();
+
         if (m_agent) {
             if (m_agent->isActive()) m_agent->stop();
             delete m_agent;
@@ -184,6 +187,14 @@ public:
                 });
         m_agent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
         m_scanning = true;
+        emit scanningChanged();
+    }
+
+    Q_INVOKABLE void stopScan() {
+        if (m_agent && m_agent->isActive()) {
+            m_agent->stop();
+        }
+        m_scanning = false;
         emit scanningChanged();
     }
 
@@ -317,7 +328,17 @@ private slots:
             return;  // Hold orientation still during calibration
         }
 
-        // Subtract measured bias so stationary tag reads ~0 deg/s
+        // Adaptive gyro bias: when sensor is nearly still, slowly update bias
+        // to track thermal drift. Uses raw (pre-subtraction) values.
+        double gyroMag = qSqrt(gx*gx + gy*gy + gz*gz);
+        if (gyroMag < 3.0) {  // nearly stationary (< 3 deg/s total)
+            const double biasAlpha = 0.01;  // slow adaptation
+            m_biasGx += biasAlpha * (gx - m_biasGx);
+            m_biasGy += biasAlpha * (gy - m_biasGy);
+            m_biasGz += biasAlpha * (gz - m_biasGz);
+        }
+
+        // Subtract adaptive bias so stationary tag reads ~0 deg/s
         gx -= m_biasGx; gy -= m_biasGy; gz -= m_biasGz;
 
         // Accelerometer-based absolute tilt reference (valid when mostly static)
@@ -334,13 +355,13 @@ private slots:
         }
 
         // Complementary filter:
-        //   96% gyro integration (fast response, full rotation including spin)
-        //    4% accel correction (prevents pitch/roll drift over time)
-        // Yaw has no absolute reference so gyro-only (slow drift is acceptable for demo)
+        //   96% gyro integration (fast response, correct axis mapping)
+        //    4% accel correction (gravity reference, prevents slow drift)
+        // Yaw: no magnetometer, gyro-only with slow decay toward zero
         const double alpha = 0.96;
         m_pitch = alpha * (m_pitch + gx * dt) + (1.0 - alpha) * acc_pitch;
         m_roll  = alpha * (m_roll  + gz * dt) + (1.0 - alpha) * acc_roll;
-        m_yaw   = m_yaw + gy * dt;
+        m_yaw   = 0.998 * (m_yaw + gy * dt);
 
         // Stream to Kafka
         g_kafka.produce(m_pitch, m_roll, m_yaw, ax, ay, az, gx, gy, gz);
@@ -445,6 +466,26 @@ private:
             dev.asyncCall("Disconnect");
         }
         m_dataPath.clear(); m_cfgPath.clear(); m_perPath.clear();
+    }
+
+    void removeCachedDevices() {
+        // Ask BlueZ ObjectManager for all known devices, then remove them
+        // so the next scan only reports currently-advertising devices
+        QDBusInterface om("org.bluez", "/",
+                          "org.freedesktop.DBus.ObjectManager",
+                          QDBusConnection::systemBus());
+        QDBusReply<BluezManagedObjects> reply = om.call("GetManagedObjects");
+        if (!reply.isValid()) return;
+
+        QDBusInterface adapter("org.bluez", "/org/bluez/hci0",
+                               "org.bluez.Adapter1",
+                               QDBusConnection::systemBus());
+        for (auto it = reply.value().constBegin(); it != reply.value().constEnd(); ++it) {
+            const QString &path = it.key().path();
+            if (path.startsWith("/org/bluez/hci0/dev_") && it.value().contains("org.bluez.Device1")) {
+                adapter.call("RemoveDevice", QVariant::fromValue(it.key()));
+            }
+        }
     }
 
     void resetStack() {

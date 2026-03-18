@@ -1,6 +1,6 @@
 # Raspberry Pi Setup
 
-Fresh Raspbian Bookworm to working kiosk in 8 steps.
+Fresh Debian Trixie to working kiosk in 9 steps.
 
 ## 1. Packages
 
@@ -37,13 +37,29 @@ dtoverlay=vc4-kms-v3d
 gpu_mem=128
 ```
 
-## 3. Bluetooth
+## 3. Touchscreen udev rule
+
+Create `/etc/udev/rules.d/99-touchscreen.rules` for a stable device symlink (Linux doesn't guarantee stable `/dev/input/eventN` numbering across reboots):
+
+```
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="ADS7846 Touchscreen", SYMLINK+="input/touchscreen"
+```
+
+This creates `/dev/input/touchscreen` → always points to the ADS7846 regardless of event numbering.
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=input
+ls -la /dev/input/touchscreen   # verify symlink exists
+```
+
+## 4. Bluetooth
 
 ```bash
 sudo systemctl enable bluetooth
 ```
 
-## 4. D-Bus permissions
+## 5. D-Bus permissions
 
 Create `/etc/dbus-1/system.d/kiosk-ble.conf`:
 
@@ -62,7 +78,7 @@ Create `/etc/dbus-1/system.d/kiosk-ble.conf`:
 </busconfig>
 ```
 
-## 5. Kiosk environment
+## 6. Kiosk environment
 
 Create `/etc/kiosk.env`:
 
@@ -76,8 +92,8 @@ QT_QPA_EGLFS_DEPTH=16
 QT_QPA_EGLFS_ALWAYS_SET_MODE=1
 QT_QPA_EGLFS_HIDECURSOR=1
 QT_QPA_EGLFS_DISABLE_INPUT=0
-QT_QPA_GENERIC_PLUGINS=tslib:/dev/input/event2
-TSLIB_TSDEVICE=/dev/input/event2
+QT_QPA_GENERIC_PLUGINS=tslib:/dev/input/touchscreen
+TSLIB_TSDEVICE=/dev/input/touchscreen
 TSLIB_CALIBFILE=/etc/pointercal
 TSLIB_CONFFILE=/etc/ts.conf
 TSLIB_FBDEVICE=/dev/fb0
@@ -94,7 +110,7 @@ Create `/etc/kiosk-eglfs.json`:
 {"device": "/dev/dri/card0", "outputs": [{"name": "HDMI1"}]}
 ```
 
-## 6. Systemd service
+## 7. Systemd service
 
 Create `/etc/systemd/system/kiosk.service`:
 
@@ -123,14 +139,14 @@ WantedBy=multi-user.target
 sudo systemctl daemon-reload && sudo systemctl enable kiosk
 ```
 
-## 7. Build + deploy
+## 8. Build + deploy
 
 ```bash
 cd ~/kiosk/src && qmake6 kiosk.pro && make -j4
 sudo cp kiosk /usr/local/bin/kiosk && sudo systemctl start kiosk
 ```
 
-## 8. Boot optimization (optional, gets to ~12s)
+## 9. Boot optimization (optional, gets to ~12s)
 
 ```bash
 sudo systemctl disable cloud-init cloud-init-local cloud-config cloud-final \

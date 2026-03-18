@@ -15,9 +15,9 @@ Window {
     property int calibStep: 0
     property var calibTaps: []
 
-    property int modelRX: 90
-    property int modelRY: 0
-    property int modelRZ: 180
+    readonly property int modelRX: 90
+    readonly property int modelRY: 0
+    readonly property int modelRZ: 180
 
     readonly property var targets: [
         Qt.point(160,  60), Qt.point(400,  60), Qt.point(640,  60),
@@ -48,7 +48,7 @@ Window {
         color: "#1a1a2e"
 
         View3D {
-            x: 0; y: 0; width: 800; height: 270
+            x: 0; y: 0; width: 800; height: 370
             environment: SceneEnvironment {
                 clearColor: "#1a1a2e"
                 backgroundMode: SceneEnvironment.Color
@@ -73,87 +73,6 @@ Window {
                     scale: Qt.vector3d(4,4,4)
                     position: Qt.vector3d(-73.2, -16.4, -102.0)
                     materials: PrincipledMaterial { baseColor: "#ccccdd"; roughness: 0.4; metalness: 0.3 }
-                }
-            }
-        }
-
-        // Axis tuning controls
-        Rectangle {
-            x: 0; y: 270; width: 800; height: 100
-            color: "#0d0d1e"
-            Rectangle { x:0; y:0; width:800; height:1; color:"#333366" }
-
-            Row {
-                anchors.centerIn: parent
-                spacing: 8
-
-                // Value readout
-                Rectangle {
-                    width: 170; height: 80; radius: 6; color: "#111133"
-                    border.color: "#444488"; border.width: 1
-                    Column {
-                        anchors.centerIn: parent; spacing: 2
-                        Text { text: "X: " + root.modelRX; font.pixelSize: 16; color: "#ff6666"; font.bold: true }
-                        Text { text: "Y: " + root.modelRY; font.pixelSize: 16; color: "#66ff66"; font.bold: true }
-                        Text { text: "Z: " + root.modelRZ; font.pixelSize: 16; color: "#66aaff"; font.bold: true }
-                    }
-                }
-
-                // X axis buttons
-                Column {
-                    spacing: 4
-                    Text { text: "X"; color: "#ff6666"; font.pixelSize: 13; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
-                    Row {
-                        spacing: 4
-                        Rectangle {
-                            width: 52; height: 34; radius: 6; color: "#3a1a1a"; border.color: "#ff6666"; border.width: 1
-                            Text { anchors.centerIn: parent; text: "-90"; color: "#ff6666"; font.pixelSize: 13 }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.BlankCursor; onClicked: root.modelRX -= 90 }
-                        }
-                        Rectangle {
-                            width: 52; height: 34; radius: 6; color: "#3a1a1a"; border.color: "#ff6666"; border.width: 1
-                            Text { anchors.centerIn: parent; text: "+90"; color: "#ff6666"; font.pixelSize: 13 }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.BlankCursor; onClicked: root.modelRX += 90 }
-                        }
-                    }
-                }
-
-                // Y axis buttons
-                Column {
-                    spacing: 4
-                    Text { text: "Y"; color: "#66ff66"; font.pixelSize: 13; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
-                    Row {
-                        spacing: 4
-                        Rectangle {
-                            width: 52; height: 34; radius: 6; color: "#1a3a1a"; border.color: "#66ff66"; border.width: 1
-                            Text { anchors.centerIn: parent; text: "-90"; color: "#66ff66"; font.pixelSize: 13 }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.BlankCursor; onClicked: root.modelRY -= 90 }
-                        }
-                        Rectangle {
-                            width: 52; height: 34; radius: 6; color: "#1a3a1a"; border.color: "#66ff66"; border.width: 1
-                            Text { anchors.centerIn: parent; text: "+90"; color: "#66ff66"; font.pixelSize: 13 }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.BlankCursor; onClicked: root.modelRY += 90 }
-                        }
-                    }
-                }
-
-                // Z axis buttons
-                Column {
-                    spacing: 4
-                    Text { text: "Z"; color: "#66aaff"; font.pixelSize: 13; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
-                    Row {
-                        spacing: 4
-                        Rectangle {
-                            width: 52; height: 34; radius: 6; color: "#1a1a3a"; border.color: "#66aaff"; border.width: 1
-                            Text { anchors.centerIn: parent; text: "-90"; color: "#66aaff"; font.pixelSize: 13 }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.BlankCursor; onClicked: root.modelRZ -= 90 }
-                        }
-                        Rectangle {
-                            width: 52; height: 34; radius: 6; color: "#1a1a3a"; border.color: "#66aaff"; border.width: 1
-                            Text { anchors.centerIn: parent; text: "+90"; color: "#66aaff"; font.pixelSize: 13 }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.BlankCursor; onClicked: root.modelRZ += 90 }
-                        }
-                    }
                 }
             }
         }
@@ -207,32 +126,28 @@ Window {
 
         // Header
         Text {
-            anchors { top: parent.top; topMargin: 28; horizontalCenter: parent.horizontalCenter }
+            x: 50; y: 28; width: 700
+            horizontalAlignment: Text.AlignHCenter
             text: sensorTag.scanning ? "Searching for SensorTag..." : "Scan Complete"
             font.pixelSize: 26; font.bold: true
             color: sensorTag.scanning ? "#4fc3f7" : (sensorTag.devices.length > 0 ? "#66ff66" : "#ff8866")
         }
         Text {
-            anchors { top: parent.top; topMargin: 70; horizontalCenter: parent.horizontalCenter }
+            x: 50; y: 70; width: 700
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
             text: sensorTag.scanning
                   ? "Scanning active — please wait"
                   : (sensorTag.devices.length > 0
                      ? "Tap a device below to connect"
                      : "No SensorTag found — wake it with the green button and scan again")
             font.pixelSize: 15; color: "#aaaacc"
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
-            width: 700
         }
 
-        // Device list (only when devices found)
+        // Device list
         ListView {
-            anchors {
-                top: parent.top; topMargin: 110
-                left: parent.left; leftMargin: 60
-                right: parent.right; rightMargin: 60
-                bottom: parent.bottom; bottomMargin: 100
-            }
+            visible: sensorTag.devices.length > 0
+            x: 60; y: 110; width: 680; height: 250
             model: sensorTag.devices
             clip: true
             spacing: 6
@@ -251,7 +166,7 @@ Window {
                 }
                 Text {
                     anchors { right: parent.right; rightMargin: 20; verticalCenter: parent.verticalCenter }
-                    text: "▶ CONNECT"
+                    text: "CONNECT ▶"
                     font.pixelSize: 16; font.bold: true; color: "#4fc3f7"
                 }
 
@@ -268,46 +183,49 @@ Window {
             }
         }
 
-        // Bottom bar — always both buttons, SCAN AGAIN dims while scanning
+        // Bottom bar — absolute position, same pattern as welcome/connected screens
         Rectangle {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-            height: 90
-            z: 10
+            x: 0; y: 370; width: 800; height: 110
             color: "#16213e"
-            Rectangle { x:0; y:0; width: parent.width; height: 2; color: "#0f3460" }
+            Rectangle { x:0; y:0; width:800; height:2; color:"#0f3460" }
 
             Row {
                 anchors.centerIn: parent
                 spacing: 20
 
                 Rectangle {
-                    width: 210; height: 60; radius: 10
-                    color: sensorTag.scanning ? "#1a2233" : "#0f3460"
-                    border.color: sensorTag.scanning ? "#556688" : "#4fc3f7"
+                    width: 240; height: 76; radius: 12
+                    color: sensorTag.scanning ? "#3a2a1a" : "#0f3460"
+                    border.color: sensorTag.scanning ? "#cc8844" : "#4fc3f7"
                     border.width: 2
                     Text {
                         anchors.centerIn: parent
-                        text: sensorTag.scanning ? "SCANNING..." : "SCAN AGAIN"
-                        font.pixelSize: 18; font.bold: true
-                        color: sensorTag.scanning ? "#667799" : "#4fc3f7"
+                        text: sensorTag.scanning ? "STOP SCAN" : "SCAN AGAIN"
+                        font.pixelSize: 20; font.bold: true
+                        color: sensorTag.scanning ? "#ffaa44" : "#4fc3f7"
                     }
                     MouseArea {
                         anchors.fill: parent; cursorShape: Qt.BlankCursor
-                        onClicked: if (!sensorTag.scanning) sensorTag.startScan()
+                        onClicked: {
+                            if (sensorTag.scanning)
+                                sensorTag.stopScan()
+                            else
+                                sensorTag.startScan()
+                        }
                     }
                 }
 
                 Rectangle {
-                    width: 210; height: 60; radius: 10
+                    width: 240; height: 76; radius: 12
                     color: "#3a1a1a"; border.color: "#cc4444"; border.width: 2
                     Text {
                         anchors.centerIn: parent
-                        text: "EXIT"
+                        text: "CANCEL"
                         font.pixelSize: 20; font.bold: true; color: "#ff6666"
                     }
                     MouseArea {
                         anchors.fill: parent; cursorShape: Qt.BlankCursor
-                        onClicked: { sensorTag.disconnectDevice(); root.screen = "welcome" }
+                        onClicked: { sensorTag.stopScan(); root.screen = "welcome" }
                     }
                 }
             }
